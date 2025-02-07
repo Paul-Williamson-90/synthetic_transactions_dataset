@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class Condition(BaseModel, ABC):
-    condition_id: int
+    condition_id: str
     likelihood: float
 
     def is_active(self) -> bool:

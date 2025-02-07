@@ -46,8 +46,21 @@ def create_item(
         likelihood_range: tuple[float, float] = (0, 1),
         quantity_distribution_types: list[str] = ["uniform", "normal", "longtail"],
         quantity_upper_bound: tuple[int, int] = (1, 20),
-        quantity_int_or_float: str = "int"
+        quantity_int_or_float: str = "int",
+        variant_distribution_type: Optional[str] = None,
+        variant_upper_bound: Optional[int] = None,
+        variant_lower_bound: Optional[int] = None,
     ) -> Item:
+
+    if not (variant_distribution_type or variant_upper_bound or variant_lower_bound):
+        variant_distribution = None
+    else:
+        variant_distribution = Distribution(
+            distribution_type=variant_distribution_type,
+            lower_bound=variant_lower_bound,
+            upper_bound=variant_upper_bound,
+            int_or_float="int"
+        )
     
     price = Distribution(
         distribution_type=price_distribution_type,
@@ -65,5 +78,6 @@ def create_item(
             lower_bound=1,
             upper_bound=np.random.randint(quantity_upper_bound[0], quantity_upper_bound[1]),
             int_or_float=quantity_int_or_float
-        )
+        ),
+        variant_distribution=variant_distribution
     )
