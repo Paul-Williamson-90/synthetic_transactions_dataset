@@ -1,4 +1,5 @@
 from typing import Optional
+import numpy as np
 from pydantic import BaseModel, model_validator
 
 from src.sampling.distributions import Distribution
@@ -34,3 +35,35 @@ class Item(BaseModel):
             "quantity": self.sample_quantity(),
             "variant": self.variant_distribution.sample() if self.variant_distribution else None
         }
+    
+
+def create_item(
+        service_id: int,
+        lower_price_bound: float = np.random.normal(50, 10),
+        upper_price_bound: float = np.random.normal(50, 10) + np.random.normal(50, 10),
+        price_distribution_type: str = "uniform",
+        int_or_float_price: str = np.random.choice(["int", "float"]),
+        likelihood_range: tuple[float, float] = (0, 1),
+        quantity_distribution_types: list[str] = ["uniform", "normal", "longtail"],
+        quantity_upper_bound: tuple[int, int] = (1, 20),
+        quantity_int_or_float: str = "int"
+    ) -> Item:
+    
+    price = Distribution(
+        distribution_type=price_distribution_type,
+        lower_bound=lower_price_bound,
+        upper_bound=upper_price_bound,
+        int_or_float=int_or_float_price,
+    ).sample()
+    
+    return Item(
+        service_id=service_id,
+        price=price,
+        likelihood=np.random.uniform(likelihood_range[0], likelihood_range[1]),
+        quantity_distribution=Distribution(
+            distribution_type=np.random.choice(quantity_distribution_types),
+            lower_bound=1,
+            upper_bound=np.random.randint(quantity_upper_bound[0], quantity_upper_bound[1]),
+            int_or_float=quantity_int_or_float
+        )
+    )
