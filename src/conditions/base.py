@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 
 class Condition(BaseModel, ABC):
+    condition_id: int
     likelihood: float
     mode: Literal["before", "after"]
 
