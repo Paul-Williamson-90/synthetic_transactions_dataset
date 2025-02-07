@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Literal
 import numpy as np
 from pydantic import BaseModel
 
@@ -7,7 +6,6 @@ from pydantic import BaseModel
 class Condition(BaseModel, ABC):
     condition_id: int
     likelihood: float
-    mode: Literal["before", "after"]
 
     def is_active(self) -> bool:
         return np.random.choice([True, False], p=[self.likelihood, 1 - self.likelihood])
@@ -15,3 +13,17 @@ class Condition(BaseModel, ABC):
     @abstractmethod
     def activate(self):
         pass
+
+
+class StaticValueCondition(Condition):
+    value: float
+
+    def activate(self) -> float:
+        return self.value
+    
+
+class MultipleValuesCondition(Condition):
+    values: list[float]
+    
+    def activate(self) -> float:
+        return np.random.choice(self.values)
