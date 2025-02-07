@@ -5,8 +5,8 @@ import numpy as np
 
 class Distribution(BaseModel):
     distribution_type: Literal["normal", "longtail", "uniform"]
-    lower_bound: int = Field(..., ge=0)
-    upper_bound: int = Field(..., ge=0)
+    lower_bound: int | float = Field(..., ge=0)
+    upper_bound: int | float = Field(..., ge=0)
     mean: Optional[float] = None  # Used for normal/longtail
     std_dev: Optional[float] = None  # Used for normal/longtail
     int_or_float: Literal["int", "float"] = "int"
@@ -48,6 +48,6 @@ class Distribution(BaseModel):
     @model_validator(mode="before")
     @classmethod
     def check_bounds(cls, v) -> dict:
-        if v["lower_bound"] >= v["upper_bound"]:
-            raise ValueError(f"Lower bound must be less than upper bound")
+        if v["lower_bound"] > v["upper_bound"]:
+            raise ValueError(f"Lower bound must be less than or equal to upper bound")
         return v
