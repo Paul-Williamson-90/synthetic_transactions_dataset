@@ -55,6 +55,7 @@ class ItemCategory(BaseModel):
         multiplier = 1
         if self.price_condition and self.price_condition.is_active() and not no_conditions:
             multiplier = self.price_condition.activate()
+            active_conditions.append(self.price_condition.condition_id)
 
         additional_items = []
         if self.joint_item_category_condition and self.joint_item_category_condition.is_active() and not no_conditions:

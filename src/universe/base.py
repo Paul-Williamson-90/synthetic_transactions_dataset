@@ -126,6 +126,11 @@ DEFAULT_SELECTION_POOLS = {
 
 class Universe:
 
+    _cols: list[str] = [
+        "cycle", "round", "customer_id", "item_category_id", "service_id", "variant", "price", "quantity", "final_price",
+        "new_customer", "contract_ammendment"
+    ]
+
     def __init__(
             self,
             n_customers: int = 50,
@@ -176,18 +181,25 @@ class Universe:
                     if profile.increase_viable():
                         if np.random.choice([True, False], p=[amendment_probability, 1 - amendment_probability]):
                             profile.modify_prices_random(
-                                factor=round(((np.random.rand() * 2) - 1) / ammendment_scale, 2),
+                                factor=1 + round(((np.random.rand() * 2) - 1) / ammendment_scale, 2),
                                 n=np.random.randint(1, 5)
                             )
                             increased = True
 
                     order = profile.sample()
                     order["contract_ammendment"] = increased
-                    order["round"] = f"{cycle + start_cycle}_{r}"
+                    order["cycle"] = cycle + start_cycle
+                    order["round"] = r
                     orders.append(order)
             self._cycle += 1
             if np.random.choice([True, False], p=[new_customer_probability, 1 - new_customer_probability]):
                 self.add_customer()
 
         orders_df = pd.concat(orders, ignore_index=True)
+
+        orders_df_conditions_exploded = orders_df.explode("conditions")
+        orders_df = pd.get_dummies(orders_df_conditions_exploded, columns=["conditions"], prefix="", prefix_sep="")
+
+        orders_df = orders_df[self._cols + [x for x in orders_df.columns if x not in self._cols]]
+
         return orders_df
