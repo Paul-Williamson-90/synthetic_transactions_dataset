@@ -127,6 +127,7 @@ class ItemCategorySelectionPool:
         self.likelihood_upper_bound = likelihood_upper_bound
         self.likelihood_lower_bound = likelihood_lower_bound
         self.category_quantity_distribution = category_quantity_distribution
+        self.joint_item_category_condition = None
         
         self.probability_condition = None
         if np.random.choice([True, False]):
@@ -170,10 +171,19 @@ class ItemCategorySelectionPool:
             ) for service_id in range(1, n_services + 1)
         ]
 
+    def add_joint_item_category_condition(self, item_category_selection_pool: "ItemCategorySelectionPool") -> None:
+        # item_category = item_category_selection_pool.sample_items(1)
+        # self.joint_item_category_condition = ItemCategoryInclusionCondition(
+        #     condition_id=f"{self.item_category_id}_{item_category.item_category_id}",
+        #     item_category=item_category,
+        #     no_conditions=True,
+        # )
+        raise NotImplementedError("This method is not yet implemented.")
+
     def __len__(self) -> int:
         return len(self.items)
 
-    def sample_items(self, n_samples: int) -> list[Item]:
+    def sample_items(self, n_samples: int) -> ItemCategory:
         if n_samples > len(self):
             warnings.warn(f"Number of samples requested is greater than the number of items in the category. Returning all items.")
         n_samples = min(n_samples, len(self))
@@ -185,5 +195,6 @@ class ItemCategorySelectionPool:
             quantity_distribution=self.category_quantity_distribution,
             probability_condition=self.probability_condition,
             price_condition=self.price_condition,
-            items=np.random.choice(self.items, n_samples).tolist()
+            items=np.random.choice(self.items, n_samples).tolist(),
+            joint_item_category_condition=self.joint_item_category_condition
         )
