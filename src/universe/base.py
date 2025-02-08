@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime, timedelta
 
 from src.item_category.base import ItemCategorySelectionPool
 from src.order_profile.base import OrderProfile
@@ -50,8 +51,8 @@ DEFAULT_SELECTION_POOLS = {
         quantity_upper_bound=(1, 5),
         quantity_int_or_float="int",
         variant_distribution_type="longtail",
-        variant_upper_bound=1,
-        variant_lower_bound=0,
+        variant_upper_bound=2,
+        variant_lower_bound=1,
     ),
     "plane_services": ItemCategorySelectionPool(
         item_category_id=3,
@@ -127,10 +128,14 @@ DEFAULT_SELECTION_POOLS = {
 class Universe:
 
     _cols: list[str] = [
-        "cycle", "round", "customer_id", "order_number", 
+        # "cycle", "round", 
+        "date", "customer_id", "order_number", 
         "item_category_id", "service_id", "variant", 
         "price", "quantity", "final_price",
         "new_customer", "contract_ammendment"
+    ]
+    _exclude_cols: list[str] = [
+        "cycle", "round"
     ]
 
     def __init__(
@@ -160,6 +165,7 @@ class Universe:
             ) for customer_id in range(1, n_customers + 1)
         ]
         self._cycle = 0
+        self._date = datetime(1990, 1, 1)
 
     def add_customer(self):
         self.profiles.append(
@@ -206,8 +212,10 @@ class Universe:
                         order["contract_ammendment"] = increased
                         order["cycle"] = cycle + start_cycle
                         order["round"] = r
+                        order["date"] = self._date
                         orders.append(order)
             self._cycle += 1
+            self._date += timedelta(days=1)
             if np.random.choice([True, False], p=[new_customer_probability, 1 - new_customer_probability]):
                 self.add_customer()
 
@@ -216,6 +224,6 @@ class Universe:
         orders_df_conditions_exploded = orders_df.explode("conditions")
         orders_df = pd.get_dummies(orders_df_conditions_exploded, columns=["conditions"], prefix="", prefix_sep="")
 
-        orders_df = orders_df[self._cols + [x for x in orders_df.columns if x not in self._cols]]
+        orders_df = orders_df[self._cols + [x for x in orders_df.columns if x not in self._cols + self._exclude_cols]]
 
         return orders_df
