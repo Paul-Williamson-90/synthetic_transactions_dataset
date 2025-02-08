@@ -10,7 +10,7 @@ class Corruptor:
             cust_probability: float = 0.5,
             days_shift: int = 20,
             max_occurrences: int = 3,
-            missing_charges_prob: float = 0.03
+            missing_charges_prob: float = 0.01
     ):
         self.random_price_change_prob = random_price_change_prob
         self.condition_not_implemented_prob = condition_not_implemented_prob
@@ -33,7 +33,7 @@ class Corruptor:
             active_indexes = df[df[cond] == 1].index
             selected = np.random.choice(active_indexes, int(len(active_indexes) * self.condition_not_implemented_prob), replace=False)
             df.loc[selected, "final_price"] = df.loc[selected, "price"] * df.loc[selected, "quantity"]
-        df["final_price"] = df["final_price"].round(2)
+        df["final_price"] = df["final_price"]
         df["flag_condition_not_implemented"] = df["temp"] != df["final_price"]
         df.drop(columns="temp", inplace=True)
         return df
