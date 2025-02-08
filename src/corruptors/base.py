@@ -1,7 +1,12 @@
 import numpy as np
 import pandas as pd
 
+from src.constants import FIXED_COLS
+
+
 class Corruptor:
+
+    _cols: list[str] = FIXED_COLS
 
     def __init__(
             self,
@@ -88,4 +93,10 @@ class Corruptor:
         df = self._missing_information(df)
         df = self._missing_charges(df)
         df["flag_discrepancy"] = df.filter(like="flag_").sum(axis=1)
+
+        df = df[
+            self._cols 
+            + [x for x in df.columns if x not in self._cols and x not in df.filter(like="flag_").columns]
+            + [x for x in df.filter(like="flag_").columns]
+        ]
         return df

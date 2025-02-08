@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from src.item_category.base import ItemCategorySelectionPool
 from src.order_profile.base import OrderProfile
 from src.sampling.distributions import Distribution
+from src.constants import FIXED_COLS
 
 
 DEFAULT_SELECTION_POOLS = {
@@ -127,13 +128,7 @@ DEFAULT_SELECTION_POOLS = {
 
 class Universe:
 
-    _cols: list[str] = [
-        # "cycle", "round", 
-        "date", "customer_id", "order_number", 
-        "item_category_id", "service_id", "variant", 
-        "price", "quantity", "final_price",
-        "new_customer", "contract_ammendment"
-    ]
+    _cols: list[str] = FIXED_COLS
 
     def __init__(
             self,
