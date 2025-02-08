@@ -134,9 +134,6 @@ class Universe:
         "price", "quantity", "final_price",
         "new_customer", "contract_ammendment"
     ]
-    _exclude_cols: list[str] = [
-        "cycle", "round"
-    ]
 
     def __init__(
             self,
@@ -206,16 +203,15 @@ class Universe:
                                 n=np.random.randint(1, 5)
                             )
                             increased = True
+                            profile.reset_increase()
                     for o_index in range(profile.order_frequency):
                         order = profile.sample()
                         order["order_number"] = o_index + 1
                         order["contract_ammendment"] = increased
-                        order["cycle"] = cycle + start_cycle
-                        order["round"] = r
                         order["date"] = self._date
                         orders.append(order)
+                self._date += timedelta(days=1)
             self._cycle += 1
-            self._date += timedelta(days=1)
             if np.random.choice([True, False], p=[new_customer_probability, 1 - new_customer_probability]):
                 self.add_customer()
 
@@ -224,6 +220,6 @@ class Universe:
         orders_df_conditions_exploded = orders_df.explode("conditions")
         orders_df = pd.get_dummies(orders_df_conditions_exploded, columns=["conditions"], prefix="", prefix_sep="")
 
-        orders_df = orders_df[self._cols + [x for x in orders_df.columns if x not in self._cols + self._exclude_cols]]
+        orders_df = orders_df[self._cols + [x for x in orders_df.columns if x not in self._cols]]
 
         return orders_df

@@ -22,7 +22,6 @@ class OrderProfile:
 
     def increase_viable(self) -> bool:
         if self.last_price_increase >= self.increase_every:
-            self.reset_increase()
             return True
         else:
             self.last_price_increase += 1
