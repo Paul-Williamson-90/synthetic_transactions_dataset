@@ -127,7 +127,9 @@ DEFAULT_SELECTION_POOLS = {
 class Universe:
 
     _cols: list[str] = [
-        "cycle", "round", "customer_id", "item_category_id", "service_id", "variant", "price", "quantity", "final_price",
+        "cycle", "round", "customer_id", "order_number", 
+        "item_category_id", "service_id", "variant", 
+        "price", "quantity", "final_price",
         "new_customer", "contract_ammendment"
     ]
 
@@ -136,7 +138,9 @@ class Universe:
             n_customers: int = 50,
             item_category_selection_pools: dict[str, ItemCategorySelectionPool] = DEFAULT_SELECTION_POOLS,
             n_item_sample_bounds: tuple[int, int] = (3, 5),
+            rounds_per_cycle: int = 50,
     ):
+        self.rounds_per_cycle = rounds_per_cycle
         self.n_item_sample_bounds = n_item_sample_bounds
         self.item_category_selection_pools = item_category_selection_pools
         self.profiles = [
@@ -147,6 +151,12 @@ class Universe:
                     .sample_items(n_samples=np.random.randint(n_item_sample_bounds[0], n_item_sample_bounds[1])) 
                     for key in item_category_selection_pools.keys()
                 ],
+                increase_every=np.random.choice([
+                    (self.rounds_per_cycle//4) * 1, 
+                    (self.rounds_per_cycle//4) * 2, 
+                    (self.rounds_per_cycle//4) * 3, 
+                    (self.rounds_per_cycle//4) * 4
+                ])
             ) for customer_id in range(1, n_customers + 1)
         ]
         self._cycle = 0
@@ -160,13 +170,18 @@ class Universe:
                     .sample_items(n_samples=np.random.randint(self.n_item_sample_bounds[0], self.n_item_sample_bounds[1]))
                     for key in self.item_category_selection_pools.keys()
                 ],
+                increase_every=np.random.choice([
+                    (self.rounds_per_cycle//4) * 1, 
+                    (self.rounds_per_cycle//4) * 2, 
+                    (self.rounds_per_cycle//4) * 3, 
+                    (self.rounds_per_cycle//4) * 4
+                ])
             )
         )
 
     def generate_orders(
             self, 
             n_cycles: int = 10, 
-            rounds_per_cycle: int = 50,
             amendment_probability: float = 0.8,
             ammendment_scale: float = 10.0,
             new_customer_probability: float = 0.05,
@@ -175,7 +190,7 @@ class Universe:
 
         start_cycle = self._cycle
         for cycle in range(start_cycle, start_cycle + n_cycles + 1):
-            for r in range(1, rounds_per_cycle + 1):
+            for r in range(1, self.rounds_per_cycle + 1):
                 for profile in self.profiles:
                     increased = False
                     if profile.increase_viable():
@@ -185,12 +200,13 @@ class Universe:
                                 n=np.random.randint(1, 5)
                             )
                             increased = True
-
-                    order = profile.sample()
-                    order["contract_ammendment"] = increased
-                    order["cycle"] = cycle + start_cycle
-                    order["round"] = r
-                    orders.append(order)
+                    for o_index in range(profile.order_frequency):
+                        order = profile.sample()
+                        order["order_number"] = o_index + 1
+                        order["contract_ammendment"] = increased
+                        order["cycle"] = cycle + start_cycle
+                        order["round"] = r
+                        orders.append(order)
             self._cycle += 1
             if np.random.choice([True, False], p=[new_customer_probability, 1 - new_customer_probability]):
                 self.add_customer()

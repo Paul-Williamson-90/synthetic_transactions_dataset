@@ -18,6 +18,7 @@ class OrderProfile:
         self.last_price_increase = 0
         self.increase_every = increase_every
         self.new_customer = True
+        self.order_frequency = np.random.randint(1, 5)
 
     def increase_viable(self) -> bool:
         if self.last_price_increase >= self.increase_every:
