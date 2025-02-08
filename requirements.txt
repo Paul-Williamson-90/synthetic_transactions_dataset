@@ -3,3 +3,6 @@ scipy==1.15.1
 pydantic==2.10.6
 matplotlib==3.10.0
 scikit_learn==1.6.1
+torch==2.6.0
+category_encoders==2.8.0
+imbalanced_learn==0.13.0
