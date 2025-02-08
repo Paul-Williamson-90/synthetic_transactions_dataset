@@ -1,3 +1,4 @@
+import warnings
 import numpy as np
 from typing import Optional
 from pydantic import BaseModel, model_validator
@@ -75,6 +76,27 @@ class ItemCategorySelectionPool:
             variant_upper_bound: int = 5,
             variant_lower_bound: int = 1,
         ):
+        """
+        Instantiate an ItemCategorySelectionPool object.
+
+        Args:
+            item_category_id (int): The unique identifier for the item category.
+            likelihood_upper_bound (float): The upper bound of the likelihood of selecting the category in an order.
+            likelihood_lower_bound (float): The lower bound of the likelihood of selecting the category in an order.
+            category_quantity_distribution (Distribution): The distribution of the number of items to be selected from the category.
+            n_services (int): The number of services to be created in the category.
+            lower_price_bound (float, optional): The lower bound of the price of the items in the category. Defaults to np.random.normal(50, 10).
+            upper_price_bound (float, optional): The upper bound of the price of the items in the category. Defaults to np.random.normal(50, 10) + np.random.normal(50, 10).
+            price_distribution_type (str, optional): The distribution of the prices of the items in the category. Defaults to "uniform".
+            int_or_float_price (str, optional): The type of the price values. Defaults to np.random.choice(["int", "float"]).
+            likelihood_range (tuple[float, float], optional): The range of likelihood values for items. Defaults to (0, 1).
+            quantity_distribution_types (list[str], optional): The types of quantity distributions. Defaults to ["uniform", "normal", "longtail"].
+            quantity_upper_bound (tuple[int, int], optional): The upper bound of the quantity distribution. Defaults to (1, 20).
+            quantity_int_or_float (str, optional): The type of the quantity values. Defaults to "int".
+            variant_distribution_type (str, optional): The distribution of the number of variants per item. Defaults to "uniform".
+            variant_upper_bound (int, optional): The upper bound of the number of variants per item. Defaults to 5.
+            variant_lower_bound (int, optional): The lower bound of the number of variants per item. Defaults to 1.
+        """
         self.item_category_id = item_category_id
         self.likelihood_upper_bound = likelihood_upper_bound
         self.likelihood_lower_bound = likelihood_lower_bound
@@ -126,6 +148,9 @@ class ItemCategorySelectionPool:
         return len(self.items)
 
     def sample_items(self, n_samples: int) -> list[Item]:
+        if n_samples > len(self):
+            warnings.warn(f"Number of samples requested is greater than the number of items in the category. Returning all items.")
+        n_samples = min(n_samples, len(self))
         likelihood_mean = (self.likelihood_upper_bound + self.likelihood_lower_bound) / 2
         likelihood_std_dev = (self.likelihood_upper_bound - self.likelihood_lower_bound) / 4
         return ItemCategory(
