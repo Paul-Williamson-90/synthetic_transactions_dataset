@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 import numpy as np
 from pydantic import BaseModel
 
-from src.item_category.base import ItemCategory
-
 
 class Condition(BaseModel, ABC):
     condition_id: str
@@ -29,10 +27,3 @@ class MultipleValuesCondition(Condition):
     
     def activate(self) -> float:
         return np.random.choice(self.values)
-    
-class ItemCategoryInclusionCondition(Condition):
-    item_category: ItemCategory
-    no_conditions: bool = False
-    
-    def activate(self) -> int:
-        return self.item_category.sample_items(no_conditions=self.no_conditions)

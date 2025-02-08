@@ -6,7 +6,14 @@ from pydantic import BaseModel, model_validator
 from src.items.base import Item, create_item
 from src.sampling.distributions import Distribution
 from src.conditions.base import Condition, StaticValueCondition, MultipleValuesCondition
-from src.conditions.base import ItemCategoryInclusionCondition
+
+
+class ItemCategoryInclusionCondition(Condition):
+    item_category: "ItemCategory"
+    no_conditions: bool = False
+    
+    def activate(self) -> int:
+        return self.item_category.sample_items(no_conditions=self.no_conditions)
 
 
 class ItemCategory(BaseModel):
