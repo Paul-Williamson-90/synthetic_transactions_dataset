@@ -43,11 +43,13 @@ class ItemCategory(BaseModel):
             active_conditions.append(self.probability_condition.condition_id)
 
         if np.random.choice([True, False], p=[likelihood, 1 - likelihood]):
+            probabilities = np.array([item.likelihood for item in self.items])
+            probabilities /= probabilities.sum()
             items: list[Item] = np.random.choice(
                 self.items,
                 size=self.quantity_distribution.sample(), 
                 replace=False,
-                p=[item.likelihood for item in self.items]
+                p=probabilities
             )
 
         multiplier = 1
