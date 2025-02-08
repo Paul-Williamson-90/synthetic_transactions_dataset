@@ -7,7 +7,7 @@ from src.sampling.distributions import Distribution
 
 class Item(BaseModel):
 
-    service_id: int
+    service_id: str
     price: float
     likelihood: float
     quantity_distribution: Distribution
@@ -38,7 +38,7 @@ class Item(BaseModel):
     
 
 def create_item(
-        service_id: int,
+        service_id: str,
         lower_price_bound: float = np.random.normal(50, 10),
         upper_price_bound: float = np.random.normal(50, 10) + np.random.normal(50, 10),
         price_distribution_type: str = "uniform",
