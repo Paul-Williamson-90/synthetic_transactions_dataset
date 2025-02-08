@@ -24,12 +24,12 @@ class ItemCategory(BaseModel):
             raise ValueError("Quantity distribution upper bound must be less than or equal to the number of items")
         return v
 
-    def sample_items(self) -> dict:
+    def sample_items(self, no_conditions: bool = False) -> dict:
         items: list[Item] = []
         active_conditions: list[int] = []
         likelihood = self.likelihood
 
-        if self.probability_condition and self.probability_condition.is_active():
+        if self.probability_condition and self.probability_condition.is_active() and not no_conditions:
             likelihood = self.probability_condition.likelihood
             active_conditions.append(self.probability_condition.condition_id)
 
@@ -41,7 +41,7 @@ class ItemCategory(BaseModel):
             )
 
         multiplier = 1
-        if self.price_condition and self.price_condition.is_active():
+        if self.price_condition and self.price_condition.is_active() and not no_conditions:
             multiplier = self.price_condition.activate()
 
         return {
