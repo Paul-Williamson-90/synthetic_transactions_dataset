@@ -92,7 +92,7 @@ class Corruptor:
         df = self._billing_logic_error(df)
         df = self._missing_information(df)
         df = self._missing_charges(df)
-        df["flag_discrepancy"] = df.filter(like="flag_").sum(axis=1)
+        df["flag_discrepancy"] = df.filter(like="flag_").sum(axis=1).astype(bool)
 
         df = df[
             self._cols 
