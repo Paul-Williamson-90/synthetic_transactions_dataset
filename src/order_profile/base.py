@@ -9,11 +9,20 @@ class OrderProfile:
             self, 
             customer_id: int, 
             item_categories: list[ItemCategory],
+            increase_every: int = 50
         ):
         self.customer_id = customer_id
         self.item_categories = item_categories
         for item_category in self.item_categories:
             item_category.modify_prices(1 + (((np.random.rand() * 2) - 1) / 2))
+        self.last_price_increase = 0
+        self.increase_every = increase_every
+
+    def increase_viable(self):
+        return self.last_price_increase >= self.increase_every
+    
+    def reset_increase(self):
+        self.last_price_increase = 0
 
     def _convert_to_order_df(self, order: dict) -> pd.DataFrame:
         customer_id = order["customer_id"]
@@ -34,10 +43,6 @@ class OrderProfile:
     def sample(self) -> dict:
         item_categories = [item_category.sample_items() for item_category in self.item_categories]
         item_categories = [x for x in item_categories if x["items"]]
-        # return {
-        #     "customer_id": self.customer_id,
-        #     "item_categories": item_categories
-        # }
         return self._convert_to_order_df({
             "customer_id": self.customer_id,
             "item_categories": item_categories
