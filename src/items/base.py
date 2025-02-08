@@ -29,10 +29,12 @@ class Item(BaseModel):
             self.price = round(self.price, 2)
 
     def sample(self, multiplier: float = 1.0) -> dict:
+        quantity = self.sample_quantity()
         return {
             "service_id": self.service_id,
-            "price": self.price * multiplier,
-            "quantity": self.sample_quantity(),
+            "price": self.price,
+            "quantity": quantity,
+            "final_price": (self.price * multiplier) * quantity,
             "variant": self.variant_distribution.sample() if self.variant_distribution else None
         }
     

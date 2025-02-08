@@ -6,6 +6,7 @@ from pydantic import BaseModel, model_validator
 from src.items.base import Item, create_item
 from src.sampling.distributions import Distribution
 from src.conditions.base import Condition, StaticValueCondition, MultipleValuesCondition
+from src.conditions.base import ItemCategoryInclusionCondition
 
 
 class ItemCategory(BaseModel):
@@ -15,6 +16,7 @@ class ItemCategory(BaseModel):
     items: list[Item]
     probability_condition: Optional[Condition] = None
     price_condition: Optional[Condition] = None
+    joint_item_category_condition: Optional[ItemCategoryInclusionCondition] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -44,9 +46,14 @@ class ItemCategory(BaseModel):
         if self.price_condition and self.price_condition.is_active() and not no_conditions:
             multiplier = self.price_condition.activate()
 
+        additional_items = []
+        if self.joint_item_category_condition and self.joint_item_category_condition.is_active() and not no_conditions:
+            active_conditions.append(self.joint_item_category_condition.condition_id)
+            additional_items = self.joint_item_category_condition.activate()
+
         return {
             "item_category_id": self.item_category_id,
-            "items": [item.sample(multiplier) for item in items],
+            "items": [item.sample(multiplier) for item in items] + additional_items,
             "conditions": active_conditions
         }
     
