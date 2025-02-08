@@ -40,7 +40,7 @@ class ItemCategory(BaseModel):
 
         if self.probability_condition and self.probability_condition.is_active() and not no_conditions:
             likelihood = self.probability_condition.likelihood
-            active_conditions.append(self.probability_condition.condition_id)
+            active_conditions.append(f"condition_{self.probability_condition.condition_id}")
 
         if np.random.choice([True, False], p=[likelihood, 1 - likelihood]):
             probabilities = np.array([item.likelihood for item in self.items])
@@ -55,11 +55,11 @@ class ItemCategory(BaseModel):
         multiplier = 1
         if self.price_condition and self.price_condition.is_active() and not no_conditions:
             multiplier = self.price_condition.activate()
-            active_conditions.append(self.price_condition.condition_id)
+            active_conditions.append(f"condition_{self.price_condition.condition_id}")
 
         additional_items = []
         if self.joint_item_category_condition and self.joint_item_category_condition.is_active() and not no_conditions:
-            active_conditions.append(self.joint_item_category_condition.condition_id)
+            active_conditions.append(f"condition_{self.joint_item_category_condition.condition_id}")
             additional_items = self.joint_item_category_condition.activate()
         
         final_items = [item.sample(multiplier) for item in items] 
