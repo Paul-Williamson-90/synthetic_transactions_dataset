@@ -35,3 +35,10 @@ pip install -r requirements.txt
 ## Suggestions for usage
 - Each of the flag_{name} features can be used for training and/or evaluating an anomaly detection algorithm (dependent on supervised vs unsupversied model approach). 
 - It is unlikely a single algorithm would work for all flags, and you will likely need to transform the data into various perspectives in order to focus in on some of the flags.
+
+## Usage
+```python
+from src.main import generate_corrupted_dataset
+
+data = generate_corrupted_dataset(n_customers=20, years=5)
+```
