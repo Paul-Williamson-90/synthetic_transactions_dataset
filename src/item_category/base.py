@@ -44,9 +44,10 @@ class ItemCategory(BaseModel):
 
         if np.random.choice([True, False], p=[likelihood, 1 - likelihood]):
             items: list[Item] = np.random.choice(
-                self.items, 
+                self.items,
                 size=self.quantity_distribution.sample(), 
-                replace=False
+                replace=False,
+                p=[item.likelihood for item in self.items]
             )
 
         multiplier = 1
@@ -57,10 +58,19 @@ class ItemCategory(BaseModel):
         if self.joint_item_category_condition and self.joint_item_category_condition.is_active() and not no_conditions:
             active_conditions.append(self.joint_item_category_condition.condition_id)
             additional_items = self.joint_item_category_condition.activate()
-
+        
+        final_items = [item.sample(multiplier) for item in items] 
+        if len(final_items) == 0:
+            return {
+                "item_category_id": self.item_category_id,
+                "items": [],
+                "conditions": []
+            }
+        
+        final_items += additional_items
         return {
             "item_category_id": self.item_category_id,
-            "items": [item.sample(multiplier) for item in items] + additional_items,
+            "items": final_items,
             "conditions": active_conditions
         }
     
